@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import open from "open";
 import querystring from "querystring";
 import emailEnquiries from "../enquiries/email-enquiries";
+import userService from "../service/user-service";
 import userStore from "../store/user-store";
 import { Environment, IGoogleUser, Routes } from "../types";
 import { getEnv, getQueryParams } from "../utils";
@@ -32,6 +33,7 @@ class OAuthAction {
                 throw new Error("No code present in redirect_uri");
             }
 
+            // get accessToken and refreshToken from google.
             const { id_token, access_token, refresh_token } = await this._getTokens({
                 code: code as string,
                 clientId: getEnv(Environment.GOOGLE_CLIENT_ID),
@@ -43,18 +45,22 @@ class OAuthAction {
 
             userStore.user = {
                 email: user.email,
-                profilePic: user.picture,
                 username: user.name,
+                accessToken: access_token,
+                refreshToken: refresh_token,
             };
 
             userStore.accessToken = access_token;
             userStore.refreshToken = refresh_token;
+
+            await userService.saveUser(user);
 
             response.writeHead(200);
             response.end(
                 "<h1 style='text-align:center;margin-top:40px;'>Authentication successful. Kindly go back to terminal<h1>"
             );
             console.log(chalk.blue("Login successful."));
+
             emailEnquiries.getEmails();
         }
     }

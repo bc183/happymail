@@ -10,7 +10,7 @@ class EmailEnquiries {
         if (answers[emailEnquiries.getEmailCount.name]) {
             const value = +answers[emailEnquiries.getEmailCount.name];
             const mails = await emailActions.fetchEmailList(value);
-            console.log(mails?.length);
+            console.log(mails);
         } else {
             exitApp("Goodbye!");
         }

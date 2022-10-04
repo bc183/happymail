@@ -37,3 +37,8 @@ export const getQueryParams = (urlToParse: string) => {
     const queryObject = url.parse(urlToParse, true).query;
     return queryObject;
 };
+
+export const base64ToString = (base64: string) => {
+    const buff = Buffer.from(base64, "base64");
+    return buff.toString("ascii");
+};

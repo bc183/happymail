@@ -5,17 +5,18 @@ class UserStore {
     private _accessToken: string | null = null;
     private _refreshToken: string | null = null;
 
-    public get user() {
-        return this._user;
+    public get user(): IUser {
+        const val = this._user;
+        if (!val) {
+            throw new Error("User not found Login again.");
+        }
+        return val;
     }
 
-    public set user(user: Omit<IUser, "createdAt" | "updatedAt"> | null) {
-        const currentDate = new Date();
+    public set user(user: IUser | null) {
         if (user) {
             this._user = {
                 ...user,
-                createdAt: currentDate,
-                updatedAt: currentDate,
             };
         }
     }
