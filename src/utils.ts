@@ -38,7 +38,38 @@ export const getQueryParams = (urlToParse: string) => {
     return queryObject;
 };
 
+/**
+ * @description convert base64 to string
+ * @param base64
+ * @returns string
+ */
 export const base64ToString = (base64: string) => {
     const buff = Buffer.from(base64, "base64");
     return buff.toString("ascii");
+};
+
+/**
+ * @description An unitily to compare dates.
+ * @param d1
+ * @param d2
+ * @returns 0 if dates are equal, 1 if d1 > d2, -1 if d1 < d2
+ */
+export const compareDate = (d1: Date, d2: Date) => {
+    if (d1 < d2) {
+        return -1;
+    } else if (d1 > d2) {
+        return 1;
+    } else {
+        return 0;
+    }
+};
+
+/**
+ * @description Return the date by reducing the number of days given,
+ * @param date
+ * @param noOfDays
+ * @returns Date
+ */
+export const subractDays = (date: Date, noOfDays: number) => {
+    return new Date(date.setDate(date.getDate() - noOfDays));
 };

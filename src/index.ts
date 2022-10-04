@@ -21,10 +21,14 @@ const initApp = async () => {
         // login using gmail OAuth.
         await oauthEnquiries.login();
     } catch (error: any) {
-        console.error(error);
         console.log(chalk.red(error.message));
         exitApp();
     }
 };
+
+process.on("uncaughtException", (error) => {
+    console.log(chalk.red(error.message));
+    exitApp();
+});
 
 initApp();

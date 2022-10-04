@@ -1,16 +1,19 @@
+/* eslint-disable indent */
 import axios from "axios";
 import chalk from "chalk";
 import emailService from "../service/email-service";
+import filterService from "../service/filter-service";
+import mailStore from "../store/mail-store";
 import userStore from "../store/user-store";
-import { GmailHeaders, IGMail, IGMailList, IMail } from "../types";
-import { getMailListUrl, getMailUrl } from "../utils";
+import { GmailHeaders, IGMail, IGMailList, IMail, IQuery, Predicate, QueryFields } from "../types";
+import { getMailListUrl, getMailUrl, subractDays } from "../utils";
 
 class EmailActions {
     constructor() {
         this.fetchEmailList = this.fetchEmailList.bind(this);
     }
 
-    async fetchEmailList(count: number) {
+    async fetchEmailList(count: number): Promise<IMail[]> {
         try {
             const user = userStore.user;
             const mails: IMail[] = [];
@@ -40,14 +43,14 @@ class EmailActions {
                     const processGMailData = this._processGMailData(fetchedMail.data);
 
                     // save mail to db
-                    emailService.saveEmail(processGMailData);
+                    // emailService.saveEmail(processGMailData);
                     mails.push(processGMailData);
                 }
                 console.log(chalk.italic("Email fetched..."));
-                return mails;
             }
+            return mails;
         } catch (error) {
-            console.log(error);
+            throw error;
         }
     }
 
@@ -84,6 +87,89 @@ class EmailActions {
             };
         } catch (error) {
             throw error;
+        }
+    }
+
+    filterMail(query: IQuery) {
+        try {
+            const queries = query.query;
+            let dayToBeCompared = new Date();
+            if (
+                queries[QueryFields.RECIEVED_AT] &&
+                typeof queries[QueryFields.RECIEVED_AT].value === "number"
+            ) {
+                dayToBeCompared = subractDays(
+                    dayToBeCompared,
+                    queries[QueryFields.RECIEVED_AT].value as number
+                );
+            }
+            const filterFunction = (mail: IMail) => {
+                for (const key of Object.keys(queries)) {
+                    const predicate = queries[key as QueryFields].predicate;
+                    const value = mail[key as keyof typeof mail];
+                    const valueToBeCompared = queries[key as QueryFields].value;
+                    const toBeTaken = this._performFilter(
+                        value,
+                        valueToBeCompared,
+                        predicate,
+                        dayToBeCompared
+                    );
+
+                    if (toBeTaken && !query.matchAll) {
+                        return true;
+                    } else if (!toBeTaken && query.matchAll) {
+                        return false;
+                    }
+                }
+
+                return query.matchAll;
+            };
+            const filteredMails = mailStore.mails.filter(filterFunction);
+
+            return filteredMails;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    private _performFilter(
+        value: string | Date | string[] | null,
+        valueToBeCompared: typeof value | number,
+        predicate: Predicate,
+        dayToBeCompared: Date
+    ): boolean {
+        switch (predicate) {
+            case Predicate.CONTAINS:
+                return (
+                    typeof value === "string" &&
+                    filterService.contains(value, valueToBeCompared as string)
+                );
+
+            case Predicate.NOT_CONTAINS:
+                return (
+                    typeof value === "string" &&
+                    !filterService.contains(value, valueToBeCompared as string)
+                );
+            case Predicate.EQUALS:
+                return (
+                    typeof value === "string" &&
+                    filterService.equals(value, valueToBeCompared as string)
+                );
+            case Predicate.NOT_EQUALS:
+                return (
+                    typeof value === "string" &&
+                    !filterService.equals(value, valueToBeCompared as string)
+                );
+            case Predicate.LESS_THAN:
+                if (value instanceof Date) {
+                    console.log(dayToBeCompared.toDateString());
+                    console.log(value.toDateString());
+
+                    return filterService.greaterThan(value, dayToBeCompared);
+                }
+                return false;
+            default:
+                return false;
         }
     }
 }

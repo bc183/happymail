@@ -9,9 +9,9 @@ export const oauthEnquiries = {
 
 export const emailEnquiries = {
     getEmailCount: {
-        type: "input",
+        type: "number",
         message: "How many email do you want to fetch ?",
         name: "emailCount",
-        default: 100,
+        default: 10,
     },
 };

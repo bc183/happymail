@@ -112,9 +112,8 @@ class OAuthAction {
                 },
             })
             .then((res) => res.data)
-            .catch((error) => {
-                console.error("Failed to fetch auth tokens");
-                throw new Error(error.message);
+            .catch((_) => {
+                throw new Error("Failed to fetch auth tokens");
             });
     }
 

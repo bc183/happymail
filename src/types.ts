@@ -78,12 +78,51 @@ export interface IMailDB extends IMail {
     user: IUser;
 }
 
+export enum QueryFields {
+    FROM = "from",
+    SUBJECT = "subject",
+    RECIEVED_AT = "recievedAt",
+}
+
+export enum Predicate {
+    CONTAINS = "contains",
+    NOT_CONTAINS = "notContains",
+    EQUALS = "equals",
+    NOT_EQUALS = "notEquals",
+    LESS_THAN = "lessThan",
+    GREATER_THAN = "greaterThan",
+}
+
+export enum Labels {
+    INBOX = "INBOX",
+    UNREAD = "UNREAD",
+    SPAM = "SPAM",
+}
+
+export interface IQuery {
+    matchAll: boolean;
+    query: Record<
+        QueryFields,
+        {
+            predicate: Predicate;
+            value: string | number;
+        }
+    >;
+    actions: {
+        move: {
+            label: Labels;
+        };
+        markAsRead: boolean;
+    };
+}
+
 export interface IUser {
     username: string;
     email: string;
     accessToken: string | null;
     refreshToken: string | null;
 }
+
 export interface IUserDB extends IUser {
     id: string;
     createdAt: Date;
