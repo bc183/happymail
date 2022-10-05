@@ -101,18 +101,12 @@ export enum Labels {
 
 export interface IQuery {
     matchAll: boolean;
-    query: Record<
-        QueryFields,
-        {
-            predicate: Predicate;
-            value: string | number;
-        }
-    >;
-    actions: {
-        move: {
+    query: { field: QueryFields; predicate: Predicate; value: string | number }[];
+    actions?: {
+        move?: {
             label: Labels;
         };
-        markAsRead: boolean;
+        markAsRead?: boolean;
     };
 }
 

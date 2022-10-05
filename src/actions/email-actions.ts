@@ -5,8 +5,8 @@ import emailService from "../service/email-service";
 import filterService from "../service/filter-service";
 import mailStore from "../store/mail-store";
 import userStore from "../store/user-store";
-import { GmailHeaders, IGMail, IGMailList, IMail, IQuery, Predicate, QueryFields } from "../types";
-import { getMailListUrl, getMailUrl, subractDays } from "../utils";
+import { GmailHeaders, IGMail, IGMailList, IMail, IQuery, Labels, Predicate } from "../types";
+import { getMailListUrl, getMailModifyUrl, getMailUrl, subractDays } from "../utils";
 
 class EmailActions {
     constructor() {
@@ -90,40 +90,26 @@ class EmailActions {
         }
     }
 
-    filterMail(query: IQuery) {
+    filterMail(queryObject: IQuery) {
         try {
-            const queries = query.query;
-            let dayToBeCompared = new Date();
-            if (
-                queries[QueryFields.RECIEVED_AT] &&
-                typeof queries[QueryFields.RECIEVED_AT].value === "number"
-            ) {
-                dayToBeCompared = subractDays(
-                    dayToBeCompared,
-                    queries[QueryFields.RECIEVED_AT].value as number
-                );
-            }
+            const queries = queryObject.query;
             const filterFunction = (mail: IMail) => {
-                for (const key of Object.keys(queries)) {
-                    const predicate = queries[key as QueryFields].predicate;
-                    const value = mail[key as keyof typeof mail];
-                    const valueToBeCompared = queries[key as QueryFields].value;
-                    const toBeTaken = this._performFilter(
-                        value,
-                        valueToBeCompared,
-                        predicate,
-                        dayToBeCompared
-                    );
+                for (const query of queries) {
+                    const predicate = query.predicate;
+                    const value = mail[query.field];
+                    const valueToBeCompared = query.value;
+                    const toBeTaken = this._performFilter(value, valueToBeCompared, predicate);
 
-                    if (toBeTaken && !query.matchAll) {
+                    if (toBeTaken && !queryObject.matchAll) {
                         return true;
-                    } else if (!toBeTaken && query.matchAll) {
+                    } else if (!toBeTaken && queryObject.matchAll) {
                         return false;
                     }
                 }
 
-                return query.matchAll;
+                return queryObject.matchAll;
             };
+
             const filteredMails = mailStore.mails.filter(filterFunction);
 
             return filteredMails;
@@ -135,9 +121,12 @@ class EmailActions {
     private _performFilter(
         value: string | Date | string[] | null,
         valueToBeCompared: typeof value | number,
-        predicate: Predicate,
-        dayToBeCompared: Date
+        predicate: Predicate
     ): boolean {
+        let dayToBeCompared = new Date();
+        if (value instanceof Date) {
+            dayToBeCompared = subractDays(dayToBeCompared, valueToBeCompared as number);
+        }
         switch (predicate) {
             case Predicate.CONTAINS:
                 return (
@@ -168,8 +157,69 @@ class EmailActions {
                     return filterService.greaterThan(value, dayToBeCompared);
                 }
                 return false;
+            case Predicate.GREATER_THAN:
+                if (value instanceof Date) {
+                    console.log(dayToBeCompared.toDateString());
+                    console.log(value.toDateString());
+
+                    return filterService.lessThan(value, dayToBeCompared);
+                }
+                return false;
             default:
                 return false;
+        }
+    }
+
+    performActions(query: IQuery, filteredMails: IMail[]): boolean {
+        try {
+            const actions = query.actions;
+            const lablesToBeAdded: Labels[] = [];
+            const lablesToBeRemoved: Labels[] = [];
+
+            if (actions?.move) {
+                lablesToBeAdded.push(actions.move.label);
+            }
+
+            if (actions?.markAsRead) {
+                lablesToBeRemoved.push(Labels.UNREAD);
+            }
+
+            const user = userStore.user;
+
+            if (lablesToBeAdded.length > 0 && lablesToBeRemoved.length > 0) {
+                for (const mail of filteredMails) {
+                    this.modifyMail(user.email, mail.messageId, lablesToBeAdded, lablesToBeRemoved);
+                }
+            }
+
+            return true;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    private async modifyMail(
+        userMail: string,
+        messageId: string,
+        lablesToBeAdded: Labels[] = [],
+        labelsToBeRemoved: Labels[] = []
+    ): Promise<boolean> {
+        try {
+            await axios.post(
+                getMailModifyUrl(userMail, messageId),
+                {
+                    addLabelIds: lablesToBeAdded,
+                    removeLabelIds: labelsToBeRemoved,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${userStore.accessToken}`,
+                    },
+                }
+            );
+            return true;
+        } catch (error) {
+            throw error;
         }
     }
 }

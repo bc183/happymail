@@ -1,15 +1,7 @@
 {
     "matchAll": true,
-    "query": {
-        "recievedAt": {
-            "predicate": "greaterThan",
-            "value": 5
-        }
-    },
+    "query": [],
     "actions": {
-        "move": {
-            "label": "SPAM"
-        },
         "markAsRead": true
     }
 }

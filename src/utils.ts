@@ -19,6 +19,10 @@ export const getMailUrl = (email: string, messageId: string): string => {
     return `${GMAIL_BASE_URL}/${email}/messages/${messageId}`;
 };
 
+export const getMailModifyUrl = (email: string, messageId: string): string => {
+    return `${GMAIL_BASE_URL}/${email}/messages/${messageId}/modify`;
+};
+
 export const getEnv = (env: Environment | string): string => {
     const value = process.env[env];
     if (!value) {
@@ -72,4 +76,8 @@ export const compareDate = (d1: Date, d2: Date) => {
  */
 export const subractDays = (date: Date, noOfDays: number) => {
     return new Date(date.setDate(date.getDate() - noOfDays));
+};
+
+export const chalkAlert = (message: string) => {
+    console.log(chalk.red(message));
 };
