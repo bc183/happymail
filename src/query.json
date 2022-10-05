@@ -1,7 +1,0 @@
-{
-    "matchAll": true,
-    "query": [],
-    "actions": {
-        "markAsRead": true
-    }
-}

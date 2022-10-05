@@ -10,16 +10,22 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+model Labels {
+    id     String   @id @default(uuid())
+    label  String
+    emails Emails[]
+}
+
 model Emails {
     id         String   @id @default(uuid())
-    messageId  String   @unique
+    messageId  String
     from       String
     to         String
     subject    String
     cc         String?
     bcc        String?
     recievedAt DateTime
-    labels     String[]
+    labels     Labels[]
     body       String?
     user       Users    @relation(fields: [userId], references: [id], name: "user")
     userId     String

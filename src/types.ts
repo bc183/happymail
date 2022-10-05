@@ -16,21 +16,26 @@ export interface IGoogleUser {
 }
 
 export interface IGMailList {
-    messages: [
-        {
-            id: string;
-        }
-    ];
+    messages: {
+        id: string;
+    }[];
+    nextPageToken: string;
 }
 
 export enum GmailHeaders {
     FROM = "From",
-    TO = "Delivered-To",
+    TO = "To",
     SUBJECT = "Subject",
     DATE = "Date",
     CONTENT_TYPE = "Content-Type",
     CC = "Cc",
     BCC = "Bc",
+}
+
+export interface IGMailMessageBody {
+    attachmentId: string;
+    size: number;
+    data?: string;
 }
 
 export interface IGMailPayload {
@@ -40,16 +45,10 @@ export interface IGMailPayload {
             value: string;
         }
     ];
-    body: {
-        size: number;
-        data?: string;
-    };
+    body: IGMailMessageBody;
     parts?: [
         {
-            body: {
-                size: number;
-                data?: string;
-            };
+            body: IGMailMessageBody;
         }
     ];
 }
@@ -61,6 +60,12 @@ export interface IGMail {
     payload: IGMailPayload;
 }
 
+export interface ILabel {
+    id?: string;
+    label: string;
+    emails?: IMail[];
+}
+
 export interface IMail {
     messageId: string;
     from: string;
@@ -70,7 +75,7 @@ export interface IMail {
     body: string | null;
     recievedAt: Date;
     subject: string;
-    labels: string[];
+    labels: ILabel[];
 }
 
 export interface IMailDB extends IMail {
@@ -81,6 +86,7 @@ export interface IMailDB extends IMail {
 export enum QueryFields {
     FROM = "from",
     SUBJECT = "subject",
+    BODY = "body",
     RECIEVED_AT = "recievedAt",
 }
 
@@ -97,6 +103,13 @@ export enum Labels {
     INBOX = "INBOX",
     UNREAD = "UNREAD",
     SPAM = "SPAM",
+    STARRED = "STARRED",
+    IMPORTANT = "IMPORTANT",
+    CATEGORY_PERSONAL = "CATEGORY_PERSONAL",
+    CATEGORY_SOCIAL = "CATEGORY_SOCIAL",
+    CATEGORY_PROMOTIONS = "CATEGORY_PROMOTIONS",
+    CATEGORY_UPDATES = "CATEGORY_UPDATES",
+    CATEGORY_FORUMS = "CATEGORY_FORUMS",
 }
 
 export interface IQuery {

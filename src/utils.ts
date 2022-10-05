@@ -1,6 +1,10 @@
 import chalk from "chalk";
 import { Environment } from "./types";
 import url from "url";
+import fs from "fs";
+import utils from "util";
+
+const write = utils.promisify(fs.writeFile);
 
 export const GMAIL_BASE_URL = "https://gmail.googleapis.com/gmail/v1/users";
 
@@ -19,8 +23,8 @@ export const getMailUrl = (email: string, messageId: string): string => {
     return `${GMAIL_BASE_URL}/${email}/messages/${messageId}`;
 };
 
-export const getMailModifyUrl = (email: string, messageId: string): string => {
-    return `${GMAIL_BASE_URL}/${email}/messages/${messageId}/modify`;
+export const getMailModifyUrl = (email: string): string => {
+    return `${GMAIL_BASE_URL}/${email}/messages/batchModify`;
 };
 
 export const getEnv = (env: Environment | string): string => {
@@ -78,6 +82,18 @@ export const subractDays = (date: Date, noOfDays: number) => {
     return new Date(date.setDate(date.getDate() - noOfDays));
 };
 
-export const chalkAlert = (message: string) => {
-    console.log(chalk.red(message));
+export const deleteFieldsFromArray = <T>(array: T[], fieldsToRemoved: T[]): T[] => {
+    const result: T[] = [];
+
+    for (const field of array) {
+        if (!fieldsToRemoved.includes(field)) {
+            result.push(field);
+        }
+    }
+
+    return result;
+};
+
+export const writeToFile = async (path: string, data: string) => {
+    await write(path, data);
 };

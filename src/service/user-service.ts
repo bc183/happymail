@@ -25,15 +25,11 @@ class UserService {
         }
     }
 
-    async getUserByEmail(email: string): Promise<IUserDB> {
+    async getUserByEmail(email: string): Promise<IUserDB | null> {
         try {
             const user = await db.users.findFirst({
                 where: { email: email },
             });
-
-            if (!user) {
-                throw new Error(`User with this ${email} not found, Kindly login again`);
-            }
 
             return user;
         } catch (error) {

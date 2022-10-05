@@ -7,10 +7,16 @@ class EmailService {
     async saveEmail(email: IMail) {
         try {
             const user = await userService.getUserByEmail(userStore.user.email);
+            if (!user) {
+                throw new Error(`User with this ${email} not found, Kindly login again`);
+            }
             const savedEmail = db.emails.create({
                 data: {
                     ...email,
                     userId: user.id,
+                    labels: {
+                        create: [...email.labels],
+                    },
                 },
             });
             return savedEmail;

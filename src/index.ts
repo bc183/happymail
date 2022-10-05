@@ -12,7 +12,9 @@ const server = http.createServer(oauthActions.handleOAuthRedirect);
 
 const initApp = async () => {
     try {
+        // check if all environment variables are set
         checkEnvironment();
+
         console.log(chalk.blue("Welcome to", chalk.italic.red("Happy Mail")));
 
         // init server for oauth redirect.

@@ -1,7 +1,9 @@
+import { Labels, QueryFields } from "../types";
+
 export const oauthEnquiries = {
     login: {
         type: "confirm",
-        message: "Do you want to login with your Google account ?",
+        message: "Do you want to login using your Google account ?",
         name: "login",
         default: true,
     },
@@ -18,9 +20,21 @@ export const emailEnquiries = {
 
 export const filterEnquiries = {
     filterFieldQuery: {
+        type: "list",
+        message: "Please select the field that you want to filter by.",
+        choices: Object.values(QueryFields),
+        name: "field",
+    },
+    filterPredicateQuery: {
+        type: "list",
+        message: "Please select the predicate for the field.",
+        choices: [],
+        name: "predicate",
+    },
+    filterValueQuery: {
         type: "input",
-        message: "Please enter the query for the field. Format: fieldname:predicate:value",
-        name: "query",
+        message: "Please enter the value to be compared.",
+        name: "value",
     },
     addFilterQueryLoop: {
         type: "confirm",
@@ -50,8 +64,9 @@ export const actionEnquiries = {
         default: true,
     },
     moveQuery: {
-        type: "input",
+        type: "list",
         message: "where do you want to move messages ?",
+        choices: Object.values(Labels),
         name: "move",
         default: "SPAM",
     },

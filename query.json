@@ -1,0 +1,5 @@
+{
+    "matchAll": false,
+    "query": [{ "field": "from", "predicate": "contains", "value": "zadsdabdd" }],
+    "actions": { "move": { "label": "SPAM" }, "markAsRead": false }
+}
