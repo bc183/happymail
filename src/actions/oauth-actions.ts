@@ -51,7 +51,11 @@ class OAuthAction {
             const { code } = getQueryParams(request.url);
 
             if (!code) {
-                throw new Error("No code present in redirect_uri");
+                response.writeHead(500);
+                response.end(
+                    "<h1 style='text-align:center;margin-top:40px;'>Authentication failed<h1>"
+                );
+                throw new Error("Login failed");
             }
 
             // get accessToken and refreshToken from google.
