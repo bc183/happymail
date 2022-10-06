@@ -20,8 +20,8 @@ model Emails {
     id         String   @id @default(uuid())
     messageId  String
     from       String
-    to         String
-    subject    String
+    to         String?
+    subject    String?
     cc         String?
     bcc        String?
     recievedAt DateTime

@@ -1,11 +1,10 @@
 import axios from "axios";
-import chalk from "chalk";
 import { IncomingMessage, ServerResponse } from "http";
 import jwt from "jsonwebtoken";
 import open from "open";
 import querystring from "querystring";
 import emailEnquiries from "../enquiries/email-enquiries";
-import { chalkAlert } from "../logger";
+import { chalkAlert, chalkInfo } from "../logger";
 import userService from "../service/user-service";
 import userStore from "../store/user-store";
 import { Environment, IGoogleUser, Routes } from "../types";
@@ -85,7 +84,7 @@ class OAuthAction {
             response.end(
                 "<h1 style='text-align:center;margin-top:40px;'>Authentication successful. Kindly go back to terminal<h1>"
             );
-            console.log(chalk.blue("Login successful."));
+            chalkInfo("Login successful.");
 
             // ask email filter regarding questions.
             await emailEnquiries.getEmails();

@@ -27,7 +27,7 @@ class UserService {
 
     async getUserByEmail(email: string): Promise<IUserDB | null> {
         try {
-            const user = await db.users.findFirst({
+            const user = await db.users.findUnique({
                 where: { email: email },
             });
 

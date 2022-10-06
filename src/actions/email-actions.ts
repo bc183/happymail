@@ -1,6 +1,6 @@
 /* eslint-disable indent */
-import chalk from "chalk";
 import axiosInstance from "../axios";
+import { chalkInfo } from "../logger";
 import emailService from "../service/email-service";
 import filterService from "../service/filter-service";
 import mailStore from "../store/mail-store";
@@ -25,7 +25,7 @@ class EmailActions {
             const mails: IMail[] = [];
             // perform only if user exists i.e logged in.
             if (user) {
-                console.log(chalk.italic("Fetching emails..."));
+                chalkInfo("Fetching emails...");
 
                 // Google has a restriction of maxCount of 500. so if the count is
                 // greaterThan 500, we perform the fetching in batches.
@@ -55,9 +55,7 @@ class EmailActions {
                     await this._getMailInBatches(messages, messages.length, mails);
                 }
 
-                console.log(mails.length);
-
-                console.log(chalk.italic("Email fetched..."));
+                chalkInfo(`${mails.length} emails fetched...`);
             }
 
             // save to db
@@ -65,7 +63,6 @@ class EmailActions {
 
             return mails;
         } catch (error) {
-            console.log(error);
             throw error;
         }
     }
@@ -80,7 +77,6 @@ class EmailActions {
         const user = userStore.user;
         let start = 0;
         const batches = count > 100 ? Math.ceil(count / 100) : 1;
-        console.log(batches);
 
         for (let batch = 0; batch < batches; batch++) {
             // extract the batch from the orginal array.
@@ -136,7 +132,7 @@ class EmailActions {
 
             return {
                 from: neededHeaders[GmailHeaders.FROM],
-                to: neededHeaders[GmailHeaders.TO],
+                to: neededHeaders[GmailHeaders.TO] ?? null,
                 cc: neededHeaders[GmailHeaders.CC] ?? null,
                 bcc: neededHeaders[GmailHeaders.BCC] ?? null,
                 body: body,

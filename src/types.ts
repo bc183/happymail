@@ -69,9 +69,9 @@ export interface ILabel {
 export interface IMail {
     messageId: string;
     from: string;
-    to: string;
-    cc: string;
-    bcc: string;
+    to: string | null;
+    cc: string | null;
+    bcc: string | null;
     body: string | null;
     recievedAt: Date;
     subject: string;
