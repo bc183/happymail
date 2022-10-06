@@ -19,6 +19,9 @@ import {
 class EmailActions {
     constructor() {
         this.fetchEmailList = this.fetchEmailList.bind(this);
+        this._getMailInBatches = this._getMailInBatches.bind(this);
+        this.filterMail = this.filterMail.bind(this);
+        this.performActions = this.performActions.bind(this);
     }
 
     /**
@@ -76,6 +79,10 @@ class EmailActions {
         }
     }
 
+    /**
+     * @description Saves the mail in the database.
+     * @param mails
+     */
     private async _saveMailInDBAsync(mails: IMail[]) {
         try {
             for (const mail of mails) {
