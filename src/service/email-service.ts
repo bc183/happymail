@@ -15,17 +15,20 @@ class EmailService {
                     },
                 },
             });
-            console.log(existingLabels);
+
             const justLabels = existingLabels.map((label) => label.label);
             const justIds = existingLabels.map((label) => {
                 return { id: label.id };
             });
-            email.labels = email.labels.filter((label) => !justLabels.includes(label.label));
+
+            const labelsToBeCreated = email.labels.filter(
+                (label) => !justLabels.includes(label.label)
+            );
 
             if (!user) {
                 throw new Error(`User with this ${email} not found, Kindly login again`);
             }
-            const savedEmail = db.emails.create({
+            const savedEmail = await db.emails.create({
                 data: {
                     user: {
                         connect: {
@@ -35,12 +38,13 @@ class EmailService {
                     ...email,
                     labels: {
                         connect: justIds,
-                        create: [...email.labels],
+                        create: labelsToBeCreated,
                     },
                 },
             });
             return savedEmail;
         } catch (error) {
+            console.log(error);
             throw new Error("Couldn't save email");
         }
     }

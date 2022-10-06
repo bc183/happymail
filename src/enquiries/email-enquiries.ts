@@ -149,7 +149,7 @@ class EmailEnquiries {
             }
 
             chalkInfo("Your query has been saved in query.json file.");
-            chalkInfo("Your query has been saved in results.json file.");
+            chalkInfo("Your results has been saved in results.json file.");
             chalkInfo("It's been nice working with you. See ya later. Bye!");
             exitApp();
         } catch (error) {

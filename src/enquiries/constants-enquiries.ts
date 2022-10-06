@@ -66,7 +66,7 @@ export const actionEnquiries = {
     moveQuery: {
         type: "list",
         message: "where do you want to move messages ?",
-        choices: Object.values(Labels),
+        choices: Object.values(Labels).filter((label) => label !== Labels.UNREAD),
         name: "move",
         default: "SPAM",
     },

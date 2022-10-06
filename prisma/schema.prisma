@@ -2,42 +2,42 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Labels {
-    id     String   @id @default(uuid())
-    label  String
-    emails Emails[]
+  id     String   @id @default(uuid())
+  label  String   @unique
+  emails Emails[]
 }
 
 model Emails {
-    id         String   @id @default(uuid())
-    messageId  String
-    from       String
-    to         String?
-    subject    String?
-    cc         String?
-    bcc        String?
-    recievedAt DateTime
-    labels     Labels[]
-    body       String?
-    user       Users    @relation(fields: [userId], references: [id], name: "user")
-    userId     String
+  id         String    @id @default(uuid())
+  messageId  String
+  from       String
+  to         String?
+  subject    String?
+  cc         String?
+  bcc        String?
+  recievedAt DateTime?
+  labels     Labels[]
+  body       String?
+  user       Users     @relation(references: [id], name: "user", fields: [usersId])
+  usersId    String
 }
 
 model Users {
-    id           String   @id @default(uuid())
-    email        String   @unique
-    username     String
-    accessToken  String?
-    refreshToken String?
-    emails       Emails[] @relation(name: "user")
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
+  id           String   @id @default(uuid())
+  email        String   @unique
+  username     String
+  accessToken  String?
+  refreshToken String?
+  emails       Emails[] @relation(name: "user")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

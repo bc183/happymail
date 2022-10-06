@@ -6,6 +6,9 @@ import utils from "util";
 
 const write = utils.promisify(fs.writeFile);
 
+export const GMAIL_LIST_MAX_COUNT = 500;
+export const GMAIL_MAX_BATCH_COUNT = 100;
+
 export const GMAIL_BASE_URL = "https://gmail.googleapis.com/gmail/v1/users";
 
 export const exitApp = (message?: string) => {

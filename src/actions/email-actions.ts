@@ -1,4 +1,5 @@
 /* eslint-disable indent */
+import { AxiosResponse } from "axios";
 import axiosInstance from "../axios";
 import { chalkInfo } from "../logger";
 import emailService from "../service/email-service";
@@ -6,7 +7,14 @@ import filterService from "../service/filter-service";
 import mailStore from "../store/mail-store";
 import userStore from "../store/user-store";
 import { GmailHeaders, IGMail, IGMailList, IMail, IQuery, Labels, Predicate } from "../types";
-import { getMailListUrl, getMailModifyUrl, getMailUrl, subractDays } from "../utils";
+import {
+    getMailListUrl,
+    getMailModifyUrl,
+    getMailUrl,
+    GMAIL_LIST_MAX_COUNT,
+    GMAIL_MAX_BATCH_COUNT,
+    subractDays,
+} from "../utils";
 
 class EmailActions {
     constructor() {
@@ -29,18 +37,22 @@ class EmailActions {
 
                 // Google has a restriction of maxCount of 500. so if the count is
                 // greaterThan 500, we perform the fetching in batches.
-                const batches = count > 500 ? Math.ceil(count / 500) : 1;
-                for (let batch = 0; batch < batches; batch++) {
-                    // token for the next page
-                    let nextPageToken: string | null = null;
+                const batches =
+                    count > GMAIL_LIST_MAX_COUNT ? Math.ceil(count / GMAIL_LIST_MAX_COUNT) : 1;
 
+                // token for the next page
+
+                let nextPageToken: string | null = null;
+
+                for (let batch = 0; batch < batches; batch++) {
                     // fetch mail list frpom google.
-                    const mailList = await axiosInstance.get<IGMailList>(
+                    const mailList: AxiosResponse<IGMailList> = await axiosInstance.get<IGMailList>(
                         getMailListUrl(user.email),
                         {
                             params: {
                                 labelsIds: "INBOX",
-                                maxResults: count > 500 ? 500 : count,
+                                maxResults:
+                                    count > GMAIL_LIST_MAX_COUNT ? GMAIL_LIST_MAX_COUNT : count,
                                 pageToken: nextPageToken,
                             },
                         }
@@ -58,12 +70,19 @@ class EmailActions {
                 chalkInfo(`${mails.length} emails fetched...`);
             }
 
-            // save to db
-            mails.forEach(emailService.saveEmail);
-
             return mails;
         } catch (error) {
             throw error;
+        }
+    }
+
+    private async _saveMailInDBAsync(mails: IMail[]) {
+        try {
+            for (const mail of mails) {
+                await emailService.saveEmail(mail);
+            }
+        } catch (error) {
+            console.log(error);
         }
     }
 
@@ -76,11 +95,12 @@ class EmailActions {
     private async _getMailInBatches(messages: { id: string }[], count: number, result: IMail[]) {
         const user = userStore.user;
         let start = 0;
-        const batches = count > 100 ? Math.ceil(count / 100) : 1;
+        const batches =
+            count > GMAIL_MAX_BATCH_COUNT ? Math.ceil(count / GMAIL_MAX_BATCH_COUNT) : 1;
 
         for (let batch = 0; batch < batches; batch++) {
             // extract the batch from the orginal array.
-            const messagesBatch = messages.slice(start, start + 100);
+            const messagesBatch = messages.slice(start, start + GMAIL_MAX_BATCH_COUNT);
             // we store all the promises in an array and execute them concurrently.
             // To reduce the time taken to fetch them.
             const emailPromises = [];
@@ -94,8 +114,11 @@ class EmailActions {
             // push the results.
             result.push(...fetchedMailData.map(this._processGMailData));
 
+            // save to db
+            this._saveMailInDBAsync(result);
+
             // next batch start
-            start = start + 100;
+            start = start + GMAIL_MAX_BATCH_COUNT;
         }
     }
 
