@@ -60,7 +60,9 @@ class EmailActions {
                             },
                         }
                     );
-
+                    if (count > GMAIL_LIST_MAX_COUNT) {
+                        count -= GMAIL_LIST_MAX_COUNT;
+                    }
                     nextPageToken = mailList.data.nextPageToken;
                     const messages = mailList.data?.messages;
 
