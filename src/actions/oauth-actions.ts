@@ -51,7 +51,7 @@ class OAuthAction {
             const { code } = getQueryParams(request.url);
 
             if (!code) {
-                response.writeHead(500);
+                response.writeHead(401);
                 response.end(
                     "<h1 style='text-align:center;margin-top:40px;'>Authentication failed<h1>"
                 );
