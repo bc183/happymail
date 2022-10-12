@@ -1,4 +1,7 @@
 import { IMail } from "../types";
+import { subractDays } from "../utils";
+
+const recievedAt2DayLess = subractDays(new Date(), 2);
 
 export const mails: IMail[] = [
     {
@@ -6,7 +9,7 @@ export const mails: IMail[] = [
         to: "Test <test@gmail.com>",
         subject: "Thi is a test mail",
         body: "<h1> I am a test mail </h1>",
-        recievedAt: new Date("2022-10-04"),
+        recievedAt: recievedAt2DayLess,
         bcc: "",
         cc: "",
         labels: [],
@@ -17,7 +20,7 @@ export const mails: IMail[] = [
         to: "Test <test@gmail.com>",
         subject: "This is a test mail for manoj",
         body: "<h1> I am a test mail for manoj </h1>",
-        recievedAt: new Date("2022-10-04"),
+        recievedAt: recievedAt2DayLess,
         bcc: "",
         cc: "",
         labels: [],
@@ -28,7 +31,7 @@ export const mails: IMail[] = [
         to: "Test <test@gmail.com>",
         subject: "Riya's test mail",
         body: "<h1> It's a test mail fpr Riya </h1>",
-        recievedAt: new Date("2022-10-06"),
+        recievedAt: new Date(),
         bcc: "",
         cc: "",
         labels: [],
